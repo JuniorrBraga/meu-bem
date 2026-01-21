@@ -153,8 +153,27 @@ function Starfield({
 }
 
 /** ---------- Hidden audio (starts on user interaction) ---------- */
-function HiddenAudio({ shouldPlay }: { shouldPlay: boolean }) {
+function HiddenAudio({
+  shouldPlay,
+  onReady,
+}: {
+  shouldPlay: boolean;
+  onReady?: (api: { resume: () => void }) => void;
+}) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const resume = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.loop = true;
+    a.volume = 0.7;
+    a.play().catch(() => { });
+  };
+
+  useEffect(() => {
+    onReady?.({ resume });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const a = audioRef.current;
@@ -164,7 +183,7 @@ function HiddenAudio({ shouldPlay }: { shouldPlay: boolean }) {
     a.volume = 0.7;
 
     if (shouldPlay) {
-      a.play().catch(() => {});
+      a.play().catch(() => { });
     } else {
       a.pause();
       a.currentTime = 0;
@@ -182,6 +201,7 @@ function HiddenAudio({ shouldPlay }: { shouldPlay: boolean }) {
 }
 
 export default function App() {
+  const audioApiRef = useRef<{ resume: () => void } | null>(null);
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [started, setStarted] = useState(false);
@@ -194,8 +214,6 @@ export default function App() {
     easterEgg?: string;
   } | null>(null);
 
-  // For "Rever esse momento"
-  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const items: JourneyItem[] = useMemo(() => {
     const images = [
@@ -419,7 +437,10 @@ export default function App() {
       <div className="pointer-events-none fixed inset-0 z-[-1] bg-[radial-gradient(circle_at_50%_30%,rgba(120,70,255,0.12),rgba(0,0,0,0.75)_55%,rgba(0,0,0,0.95)_100%)]" />
 
       {/* Audio starts on Start Journey */}
-      <HiddenAudio shouldPlay={started} />
+      <HiddenAudio
+        shouldPlay={started}
+        onReady={(api) => (audioApiRef.current = api)}
+      />
 
       {/* PASSWORD GATE */}
       <AnimatePresence>
@@ -554,7 +575,7 @@ export default function App() {
                 Cada ponto é uma constelação.
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/55">
-                Dica: tem botão de “Rever esse momento” em cada card 😉
+                Dica: clique nas fotos pra ver tudo sem cortar 😉
               </p>
             </motion.div>
           </section>
@@ -569,9 +590,6 @@ export default function App() {
                 {items.map((item, idx) => (
                   <motion.div
                     key={item.id}
-                    ref={(el) => {
-                      itemRefs.current[item.id] = el;
-                    }}
                     initial={{ opacity: 0, y: 22 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.35 }}
@@ -579,8 +597,6 @@ export default function App() {
                     className="relative"
                   >
                     {/* Node */}
-                    <div className="pointer-events-none absolute left-1/2 top-8 z-10 -translate-x-1/2">
-                    </div>
 
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-12 sm:gap-6">
                       <div
@@ -670,7 +686,16 @@ export default function App() {
                                   controls
                                   playsInline
                                   preload="metadata"
+                                  muted
+                                  onPlay={() => audioApiRef.current?.resume()}
+                                  onPause={() => audioApiRef.current?.resume()}
+                                  onVolumeChange={(e) => {
+                                    const v = e.currentTarget;
+                                    if (!v.muted) v.muted = true;
+                                    audioApiRef.current?.resume();
+                                  }}
                                 />
+
                               )}
 
                               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.10),rgba(0,0,0,0)_35%),radial-gradient(circle_at_70%_60%,rgba(170,120,255,0.10),rgba(0,0,0,0)_45%)]" />
