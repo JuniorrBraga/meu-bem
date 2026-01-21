@@ -21,7 +21,7 @@
 //
 // Password: "senha"
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 
 type MediaKind = "image" | "video" | "chapter";
@@ -181,32 +181,6 @@ function HiddenAudio({ shouldPlay }: { shouldPlay: boolean }) {
   );
 }
 
-/** ---------- Little constellation connector dots ---------- */
-function ConstellationDot({ index }: { index: number }) {
-  const offsets = [
-    { x: -18, y: -10 },
-    { x: 22, y: 6 },
-    { x: -26, y: 14 },
-    { x: 18, y: -4 },
-    { x: -14, y: 10 },
-    { x: 26, y: -8 },
-    { x: -22, y: 4 },
-  ];
-  const o = offsets[index % offsets.length];
-
-  return (
-    <div
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-3 w-3 rounded-full shadow-[0_0_22px_rgba(170,120,255,0.85)]"
-      style={{
-        marginLeft: o.x,
-        marginTop: o.y,
-        background:
-          "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(178,120,255,0.95) 40%, rgba(120,70,255,0.25) 70%, rgba(0,0,0,0) 75%)",
-      }}
-    />
-  );
-}
-
 export default function App() {
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
@@ -222,12 +196,6 @@ export default function App() {
 
   // For "Rever esse momento"
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  const scrollToItem = (id: string) => {
-    const el = itemRefs.current[id];
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   const items: JourneyItem[] = useMemo(() => {
     const images = [
@@ -312,8 +280,8 @@ export default function App() {
       "Easter egg: checkpoint desbloqueado — cochilo no peito 😴",
       "Easter egg: missão: chegar vivo e não passar vergonha 🎯",
       "Easter egg: buff ativo — cerveja gelada + companhia 10/10 🍻",
-      "Easter egg: modo stalker do bem (só admirando) 👀",
-      "Easter egg: DLC “pais de pet/criança” liberada 🍼",
+      "Easter egg: modo safado ativado 👀",
+      "Easter egg: DLC pais liberada 🍼",
       "Easter egg: status: “quase oficial”, mas eu queria era mundial 🌍",
     ];
 
